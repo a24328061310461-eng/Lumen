@@ -1,0 +1,1165 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LUMEN · Fuentes de Energía Renovable</title>
+<style>
+  :root{
+    --verde:#00c896;
+    --verde-osc:#007a5b;
+    --amarillo:#ffd23f;
+    --naranja:#ff7b3d;
+    --azul:#3a86ff;
+    --violeta:#8338ec;
+    --rosa:#ff4d9d;
+    --blanco:#ffffff;
+    --blanco-2:#f4f7f5;
+    --tinta:#0a1612;
+    --tinta-suave:#2a4a3e;
+    --gris:#6b8f80;
+    --linea:rgba(10,22,18,.1);
+    --sombra:0 30px 80px rgba(10,22,18,.15);
+    --rojo:#d92d20;
+    --rojo-suave:rgba(217,45,32,.08);
+  }
+  [data-theme="dark"]{
+    --blanco:#0a1612;
+    --blanco-2:#0f1f1a;
+    --tinta:#e8f5ef;
+    --tinta-suave:#a8c4b8;
+    --gris:#6b8f80;
+    --linea:rgba(0,255,190,.12);
+    --sombra:0 30px 80px rgba(0,0,0,.5);
+    --rojo:#ff6b5e;
+    --rojo-suave:rgba(255,107,94,.1);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    background:var(--blanco);
+    color:var(--tinta);
+    overflow-x:hidden;
+    transition:background .6s ease, color .6s ease;
+  }
+  body.cursor-hidden,body.cursor-hidden *{cursor:none !important}
+  a,button{cursor:pointer}
+  ::selection{background:var(--verde);color:#000}
+  img,svg{display:block}
+
+  .cursor-dot,.cursor-ring{
+    position:fixed;top:0;left:0;border-radius:50%;
+    pointer-events:none;z-index:9999;
+    will-change:transform;
+    transform:translate3d(-100px,-100px,0);
+  }
+  .cursor-dot{width:10px;height:10px;background:var(--rosa);margin:-5px 0 0 -5px;mix-blend-mode:difference}
+  .cursor-ring{
+    width:40px;height:40px;border:2px solid var(--verde);
+    margin:-20px 0 0 -20px;
+    transition:width .2s,height .2s,margin .2s,border-color .2s,background .2s;
+    mix-blend-mode:difference;
+  }
+  .cursor-ring.hover{
+    width:70px;height:70px;margin:-35px 0 0 -35px;
+    border-color:var(--rosa);background:rgba(255,77,157,.1);
+  }
+
+  /* ===== PRELOADER ===== */
+  #preloader{
+    position:fixed;inset:0;z-index:10000;
+    background:#0a1612;
+    display:flex;flex-direction:column;justify-content:center;align-items:center;
+    overflow:hidden;
+    transition:opacity .8s ease, visibility .8s;
+  }
+  #preloader.done{opacity:0;visibility:hidden}
+  .pre-text{
+    font-size:clamp(3rem,12vw,10rem);font-weight:900;letter-spacing:-.04em;
+    color:#fff;line-height:.9;text-align:center;
+    position:relative;z-index:2;
+  }
+  .pre-text .line{display:block;overflow:hidden}
+  .pre-text .line span{
+    display:inline-block;
+    transform:translateY(100%);
+    animation:slideUp .8s cubic-bezier(.2,.8,.2,1) forwards;
+  }
+  .pre-text .line:nth-child(1) span{animation-delay:.1s}
+  .pre-text .line:nth-child(2) span{animation-delay:.3s}
+  @keyframes slideUp{to{transform:translateY(0)}}
+  .pre-text .accent{
+    background:linear-gradient(120deg,var(--verde),var(--amarillo),var(--naranja),var(--rosa));
+    background-size:300% 300%;
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    animation:gradFlow 3s ease infinite;
+  }
+  @keyframes gradFlow{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+
+  .pre-shapes{position:absolute;inset:0;pointer-events:none}
+  .pre-shape{
+    position:absolute;border-radius:50%;filter:blur(80px);opacity:.4;
+    animation:shapeFloat 6s ease-in-out infinite;
+  }
+  .pre-shape.s1{width:400px;height:400px;background:var(--verde);top:-100px;left:-100px}
+  .pre-shape.s2{width:350px;height:350px;background:var(--violeta);bottom:-100px;right:-50px;animation-delay:1s}
+  .pre-shape.s3{width:300px;height:300px;background:var(--naranja);top:50%;left:50%;transform:translate(-50%,-50%);animation-delay:2s}
+  @keyframes shapeFloat{50%{transform:translate(30px,30px) scale(1.2)}}
+
+  .pre-counter{
+    position:absolute;bottom:40px;right:40px;
+    font-size:clamp(4rem,15vw,10rem);font-weight:900;
+    color:rgba(255,255,255,.1);line-height:1;
+    font-variant-numeric:tabular-nums;
+  }
+
+  #wipe{
+    position:fixed;inset:0;z-index:9998;
+    background:var(--blanco);
+    transform:translateY(100%);
+    transition:transform .9s cubic-bezier(.76,0,.24,1);
+    pointer-events:none;
+  }
+  #wipe.play{transform:translateY(0)}
+  #wipe.exit{transform:translateY(-100%)}
+
+  .bg-grid{
+    position:fixed;inset:0;z-index:-3;
+    background-image:
+      linear-gradient(var(--linea) 1px,transparent 1px),
+      linear-gradient(90deg,var(--linea) 1px,transparent 1px);
+    background-size:80px 80px;
+    animation:gridMove 30s linear infinite;
+    pointer-events:none;
+    opacity:.3;
+  }
+  @keyframes gridMove{to{background-position:80px 80px}}
+
+  nav{
+    position:fixed;top:0;left:0;right:0;z-index:900;
+    padding:20px 6vw;display:flex;justify-content:space-between;align-items:center;
+    mix-blend-mode:difference;
+    color:#fff;
+    transform:translateY(-100%);transition:transform .6s cubic-bezier(.2,.8,.2,1);
+  }
+  nav.show{transform:translateY(0)}
+  .logo{
+    font-weight:900;font-size:1.6rem;letter-spacing:.2em;
+    text-decoration:none;color:#fff;
+  }
+  .nav-right{display:flex;align-items:center;gap:30px}
+  .nav-links{display:flex;gap:30px;list-style:none}
+  .nav-links a{
+    color:#fff;text-decoration:none;font-size:.75rem;letter-spacing:.15em;
+    text-transform:uppercase;font-weight:700;position:relative;padding:4px 0;
+    transition:opacity .3s;
+  }
+  .nav-links a::after{
+    content:'';position:absolute;bottom:0;left:0;width:0;height:2px;
+    background:var(--rosa);transition:width .3s;
+  }
+  .nav-links a:hover::after{width:100%}
+
+  .theme-toggle{
+    position:relative;width:62px;height:32px;border-radius:40px;
+    background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.3);
+    padding:0;display:flex;align-items:center;flex-shrink:0;
+    transition:background .4s,border-color .4s;
+  }
+  .theme-toggle .knob{
+    position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;
+    background:linear-gradient(135deg,var(--amarillo),var(--naranja));
+    display:grid;place-items:center;
+    transition:transform .45s cubic-bezier(.5,1.6,.5,1),background .4s;
+  }
+  .theme-toggle .knob svg{width:14px;height:14px;transition:opacity .3s,transform .4s}
+  .theme-toggle .knob .ico-sun{color:#5a3a00}
+  .theme-toggle .knob .ico-moon{color:#fff;position:absolute;opacity:0;transform:rotate(-90deg) scale(.5)}
+  [data-theme="dark"] .theme-toggle{background:rgba(0,255,190,.15);border-color:rgba(0,255,190,.3)}
+  [data-theme="dark"] .theme-toggle .knob{transform:translateX(30px);background:linear-gradient(135deg,#4a7dff,#7c3aed)}
+  [data-theme="dark"] .theme-toggle .knob .ico-sun{opacity:0;transform:rotate(90deg) scale(.5)}
+  [data-theme="dark"] .theme-toggle .knob .ico-moon{opacity:1;transform:rotate(0) scale(1)}
+
+  /* ===== TORRE DE ALTA TENSIÓN ===== */
+  .power-tower{
+    position:absolute;
+    left:-30px;
+    top:0;
+    height:100%;
+    width:260px;
+    pointer-events:none;
+    z-index:1;
+    opacity:0;
+    animation:towerIn 1.6s 2.2s cubic-bezier(.2,.8,.2,1) forwards;
+  }
+  @keyframes towerIn{
+    0%{opacity:0;transform:translateX(-80px)}
+    100%{opacity:1;transform:translateX(0)}
+  }
+  .power-tower svg{width:100%;height:100%;overflow:visible}
+
+  /* ===== HERO ===== */
+  #hero{
+    background:linear-gradient(160deg,#0a1612 0%,#0f2a20 50%,#0a1612 100%);
+    color:#fff;
+    min-height:100vh;
+    display:flex;flex-direction:column;justify-content:center;
+    padding:140px 6vw 60px;
+    position:relative;
+    overflow:hidden;
+  }
+  #hero .hero-sub{
+    font-size:.85rem;letter-spacing:.5em;color:var(--verde);
+    text-transform:uppercase;font-weight:800;margin-bottom:30px;
+    opacity:0;animation:fadeUp 1s .6s forwards;
+    position:relative;z-index:2;
+  }
+  #hero .hero-title{
+    font-size:clamp(3rem,10vw,9rem);font-weight:900;
+    line-height:.88;letter-spacing:-.05em;
+    max-width:1300px;
+    position:relative;z-index:2;
+  }
+  #hero .hero-title .line{display:block;overflow:hidden}
+  #hero .hero-title .line span{
+    display:inline-block;
+    transform:translateY(110%);
+    animation:slideUp 1s cubic-bezier(.2,.8,.2,1) forwards;
+  }
+  #hero .hero-title .line:nth-child(1) span{animation-delay:.8s}
+  #hero .hero-title .line:nth-child(2) span{animation-delay:1s}
+  #hero .hero-title .line:nth-child(3) span{animation-delay:1.2s}
+  #hero .hero-title .grad{
+    background:linear-gradient(120deg,var(--verde),var(--amarillo) 30%,var(--naranja) 60%,var(--rosa) 80%,var(--violeta));
+    background-size:250% 250%;
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    animation:gradFlow 8s ease infinite;
+  }
+  #hero .hero-info{
+    display:flex;gap:60px;margin-top:60px;flex-wrap:wrap;
+    opacity:0;animation:fadeUp 1s 1.5s forwards;
+    position:relative;z-index:2;
+  }
+  .hero-stat{display:flex;flex-direction:column;gap:8px}
+  .hero-stat .num{
+    font-size:2.4rem;font-weight:900;
+    background:linear-gradient(120deg,var(--verde),var(--amarillo));
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .hero-stat .lbl{
+    font-size:.7rem;letter-spacing:.25em;text-transform:uppercase;
+    color:rgba(255,255,255,.5);font-weight:700;
+  }
+  #hero .scroll-hint{
+    position:absolute;bottom:40px;left:6vw;
+    font-size:.7rem;letter-spacing:.4em;text-transform:uppercase;
+    color:rgba(255,255,255,.4);display:flex;align-items:center;gap:14px;
+    opacity:0;animation:fadeUp 1s 1.8s forwards;
+    z-index:2;
+  }
+  .scroll-hint .line-anim{
+    width:50px;height:1px;background:var(--verde);position:relative;overflow:hidden;
+  }
+  .scroll-hint .line-anim::after{
+    content:'';position:absolute;inset:0;background:#fff;
+    transform:translateX(-100%);animation:slideLine 2s ease-in-out infinite;
+  }
+  @keyframes slideLine{50%{transform:translateX(0)}100%{transform:translateX(100%)}}
+
+  @keyframes fadeUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  .chapter{
+    min-height:100vh;position:relative;
+    display:flex;flex-direction:column;justify-content:center;
+    padding:120px 6vw;
+    overflow:hidden;
+  }
+  .chapter-num{
+    font-size:clamp(6rem,20vw,18rem);font-weight:900;line-height:.8;
+    letter-spacing:-.06em;
+    color:transparent;-webkit-text-stroke:2px var(--linea);
+    position:absolute;top:40px;left:6vw;
+    pointer-events:none;z-index:0;
+  }
+  .chapter-title{
+    font-size:clamp(2.5rem,7vw,6rem);font-weight:900;
+    line-height:.95;letter-spacing:-.04em;
+    position:relative;z-index:2;
+    max-width:1100px;
+  }
+  .chapter-title .reveal-line{display:block;overflow:hidden}
+  .chapter-title .reveal-line span{
+    display:inline-block;
+    transform:translateY(110%);
+    transition:transform .9s cubic-bezier(.2,.8,.2,1);
+  }
+  .chapter.visible .chapter-title .reveal-line span{transform:translateY(0)}
+  .chapter-title .reveal-line:nth-child(2) span{transition-delay:.1s}
+  .chapter-title .reveal-line:nth-child(3) span{transition-delay:.2s}
+  .chapter-title .accent{
+    background:linear-gradient(120deg,var(--verde),var(--amarillo),var(--naranja),var(--rosa),var(--violeta));
+    background-size:300% 300%;
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    animation:gradFlow 6s ease infinite;
+  }
+
+  .chapter-desc{
+    max-width:540px;font-size:1.1rem;line-height:1.8;
+    color:var(--tinta-suave);margin-top:30px;
+    position:relative;z-index:2;
+    opacity:0;transform:translateY(30px);
+    transition:opacity .8s .3s,transform .8s .3s;
+  }
+  .chapter.visible .chapter-desc{opacity:1;transform:translateY(0)}
+
+  /* ===== SECCIÓN 01: ENERGÍAS ===== */
+  #energias{background:var(--blanco-2)}
+  .energy-cards{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:24px;
+    margin-top:60px;position:relative;z-index:2;
+  }
+  @media(max-width:900px){.energy-cards{grid-template-columns:1fr}}
+  .energy-card{
+    position:relative;padding:40px 30px;border-radius:4px;
+    background:var(--blanco);
+    border:1px solid var(--linea);
+    overflow:hidden;
+    transition:transform .5s cubic-bezier(.2,.8,.2,1),box-shadow .5s;
+    opacity:0;transform:translateY(40px);
+  }
+  .chapter.visible .energy-card{opacity:1;transform:translateY(0)}
+  .energy-card:nth-child(1){transition-delay:.1s}
+  .energy-card:nth-child(2){transition-delay:.2s}
+  .energy-card:nth-child(3){transition-delay:.3s}
+  .energy-card:nth-child(4){transition-delay:.4s}
+  .energy-card:nth-child(5){transition-delay:.5s}
+  .energy-card:nth-child(6){transition-delay:.6s}
+  .energy-card:hover{transform:translateY(-10px);box-shadow:var(--sombra)}
+  .energy-card .card-num{
+    font-size:5rem;font-weight:900;line-height:1;
+    color:transparent;-webkit-text-stroke:1.5px var(--accent);
+    position:absolute;top:20px;right:24px;opacity:.3;
+    transition:opacity .4s;
+  }
+  .energy-card:hover .card-num{opacity:.8}
+  .energy-card .card-icon{
+    width:60px;height:60px;border-radius:50%;
+    display:grid;place-items:center;margin-bottom:26px;
+    background:var(--accent);opacity:.15;
+    transition:opacity .4s,transform .4s;
+  }
+  .energy-card:hover .card-icon{opacity:.3;transform:rotate(-10deg) scale(1.1)}
+  .energy-card .card-icon svg{width:32px;height:32px}
+  .energy-card h3{
+    font-size:1.6rem;font-weight:900;margin-bottom:14px;
+    letter-spacing:-.02em;
+  }
+  .energy-card p{color:var(--tinta-suave);font-size:.95rem;line-height:1.7}
+  .energy-card .card-tag{
+    display:inline-block;margin-top:24px;
+    font-size:.65rem;letter-spacing:.25em;text-transform:uppercase;
+    color:var(--accent);font-weight:800;
+  }
+  .energy-card.solar{--accent:var(--amarillo)}
+  .energy-card.eolica{--accent:var(--azul)}
+  .energy-card.hidraulica{--accent:var(--verde)}
+  .energy-card.biomasa{--accent:var(--naranja)}
+  .energy-card.geotermica{--accent:var(--rosa)}
+  .energy-card.mareomotriz{--accent:var(--violeta)}
+
+  /* ===== SECCIÓN 02: TABLA DESLIZABLE ===== */
+  #impacto{background:var(--blanco)}
+  #impacto .chapter-title{max-width:1000px}
+
+  .table-instructions{
+    display:flex;align-items:center;gap:14px;margin-top:20px;
+    font-size:.85rem;color:var(--gris);letter-spacing:.05em;
+    position:relative;z-index:2;font-weight:600;
+  }
+  .table-instructions .icon{
+    width:20px;height:20px;color:var(--verde);
+    animation:nudge 1.6s ease-in-out infinite;
+  }
+  @keyframes nudge{0%,100%{transform:translateX(0)}50%{transform:translateX(6px)}}
+
+  .table-switcher{
+    display:inline-flex;gap:4px;margin-top:30px;padding:4px;
+    background:var(--blanco-2);border-radius:40px;border:1px solid var(--linea);
+    position:relative;z-index:2;
+  }
+  .table-switcher button{
+    padding:10px 24px;border-radius:36px;border:none;background:transparent;
+    font-size:.8rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--tinta-suave);font-family:inherit;
+    transition:background .3s,color .3s;
+  }
+  .table-switcher button.active{
+    background:var(--tinta);color:var(--blanco);
+  }
+  .table-switcher button:hover:not(.active){color:var(--tinta)}
+
+  .table-viewport{
+    margin-top:40px;position:relative;z-index:2;
+    overflow:hidden;
+    border:1px solid var(--linea);
+    border-radius:6px;
+    background:var(--blanco);
+  }
+  .table-slider{
+    display:flex;
+    transition:transform .55s cubic-bezier(.6,.05,.2,1);
+    will-change:transform;
+  }
+  .table-panel{
+    min-width:100%;
+    flex-shrink:0;
+    padding:0;
+  }
+  .impact-table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:.92rem;
+  }
+  .impact-table thead th{
+    text-align:left;
+    padding:20px 24px;
+    font-size:.7rem;
+    letter-spacing:.2em;
+    text-transform:uppercase;
+    font-weight:900;
+    border-bottom:2px solid var(--linea);
+    background:var(--blanco-2);
+    color:var(--tinta-suave);
+    white-space:nowrap;
+  }
+  .impact-table thead th:first-child{color:var(--tinta);font-size:.75rem}
+  .impact-table tbody td{
+    padding:18px 24px;
+    border-bottom:1px solid var(--linea);
+    vertical-align:top;
+    line-height:1.5;
+    color:var(--tinta-suave);
+  }
+  .impact-table tbody tr:last-child td{border-bottom:none}
+  .impact-table tbody tr{transition:background .2s}
+  .impact-table tbody tr:hover{background:var(--blanco-2)}
+  .impact-table tbody td:first-child{
+    font-weight:800;
+    color:var(--tinta);
+    white-space:nowrap;
+  }
+  .tag-cell{
+    display:inline-block;
+    padding:4px 10px;
+    border-radius:20px;
+    font-size:.7rem;
+    font-weight:800;
+    letter-spacing:.05em;
+    white-space:nowrap;
+  }
+  .tag-alto{background:var(--rojo-suave);color:var(--rojo)}
+  .tag-medio{background:rgba(255,123,61,.1);color:var(--naranja)}
+  .tag-bajo{background:rgba(0,200,150,.1);color:var(--verde-osc)}
+
+  .table-legend{
+    display:flex;gap:20px;flex-wrap:wrap;margin-top:24px;
+    font-size:.78rem;color:var(--gris);position:relative;z-index:2;
+  }
+  .table-legend span{display:inline-flex;align-items:center;gap:8px}
+  .table-legend .dot{width:10px;height:10px;border-radius:50%}
+
+  /* ===== SECCIÓN 03: HISTORIA ===== */
+  #historia{background:var(--blanco-2)}
+  .timeline{
+    position:relative;margin-top:70px;padding-left:60px;
+    max-width:900px;z-index:2;
+  }
+  .timeline::before{
+    content:'';position:absolute;left:20px;top:0;bottom:0;width:2px;
+    background:linear-gradient(var(--verde),var(--azul),var(--violeta),var(--rosa),var(--naranja));
+  }
+  .tl-item{
+    position:relative;padding-bottom:60px;
+    opacity:0;transform:translateX(-30px);
+    transition:opacity .8s,transform .8s;
+  }
+  .chapter.visible .tl-item{opacity:1;transform:translateX(0)}
+  .tl-item:nth-child(1){transition-delay:.1s}
+  .tl-item:nth-child(2){transition-delay:.2s}
+  .tl-item:nth-child(3){transition-delay:.3s}
+  .tl-item:nth-child(4){transition-delay:.4s}
+  .tl-item:nth-child(5){transition-delay:.5s}
+  .tl-item:last-child{padding-bottom:0}
+  .tl-dot{
+    position:absolute;left:-46px;top:4px;width:14px;height:14px;
+    border-radius:50%;background:var(--blanco);
+    border:3px solid var(--verde);
+    animation:dotPulse 2.5s infinite;
+  }
+  @keyframes dotPulse{
+    0%{box-shadow:0 0 0 0 rgba(0,200,150,.5)}
+    70%{box-shadow:0 0 0 14px rgba(0,200,150,0)}
+    100%{box-shadow:0 0 0 0 rgba(0,200,150,0)}
+  }
+  .tl-year{
+    font-size:2rem;font-weight:900;color:var(--verde-osc);
+    margin-bottom:8px;letter-spacing:-.03em;
+  }
+  .tl-item p{color:var(--tinta-suave);line-height:1.8;max-width:600px;font-size:.95rem}
+
+  /* ===== SECCIÓN 04: FUTURO ===== */
+  #futuro{
+    background:linear-gradient(160deg,#0a1612 0%,#1a0f2a 50%,#0a1612 100%);
+    color:#fff;text-align:center;
+    align-items:center;
+  }
+  #futuro .chapter-title{max-width:900px;margin:0 auto}
+  #futuro .chapter-desc{margin:30px auto 0;color:rgba(255,255,255,.6);text-align:center;opacity:1;transform:none}
+
+  /* ===== MARQUEE ===== */
+  .marquee{
+    overflow:hidden;white-space:nowrap;
+    border-top:1px solid var(--linea);border-bottom:1px solid var(--linea);
+    padding:20px 0;background:var(--blanco);
+    position:relative;z-index:2;
+  }
+  .marquee-track{display:inline-flex;gap:80px;animation:marquee 35s linear infinite}
+  .marquee:hover .marquee-track{animation-play-state:paused}
+  .marquee span{
+    font-size:1rem;letter-spacing:.3em;text-transform:uppercase;
+    color:var(--tinta-suave);display:inline-flex;align-items:center;gap:80px;
+    font-weight:800;
+  }
+  .marquee span::after{content:'✦';color:var(--verde);font-size:1.2rem}
+  @keyframes marquee{to{transform:translateX(-50%)}}
+
+  /* ===== FOOTER ===== */
+  footer{
+    background:var(--blanco);border-top:1px solid var(--linea);
+    padding:70px 6vw 40px;position:relative;z-index:2;
+    transition:background .6s;
+  }
+  .footer-grid{
+    display:grid;grid-template-columns:2fr 1fr 1fr;gap:50px;
+    max-width:1300px;margin:0 auto 60px;
+  }
+  @media(max-width:850px){.footer-grid{grid-template-columns:1fr 1fr}}
+  @media(max-width:520px){.footer-grid{grid-template-columns:1fr}}
+  .footer-brand .logo{font-size:1.8rem;margin-bottom:18px;display:inline-block;color:var(--tinta)}
+  .footer-brand p{color:var(--tinta-suave);font-size:.9rem;line-height:1.8;max-width:320px}
+  .footer-col h4{
+    font-size:.7rem;letter-spacing:.3em;text-transform:uppercase;
+    color:var(--verde-osc);margin-bottom:22px;font-weight:800;
+  }
+  .footer-col ul{list-style:none;display:flex;flex-direction:column;gap:12px}
+  .footer-col a{color:var(--tinta-suave);text-decoration:none;font-size:.9rem;transition:color .3s,padding-left .3s}
+  .footer-col a:hover{color:var(--verde-osc);padding-left:6px}
+  .footer-bottom{
+    max-width:1300px;margin:0 auto;padding-top:30px;
+    border-top:1px solid var(--linea);
+    display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;
+    color:var(--gris);font-size:.8rem;
+  }
+  .footer-bottom .year{font-weight:900;color:var(--verde-osc);font-size:1rem}
+
+  @media(max-width:900px){
+    .chapter{padding:100px 6vw}
+    .chapter-num{font-size:6rem;top:20px}
+    .nav-links{display:none}
+    .power-tower{width:160px;left:-50px;opacity:.5}
+    .impact-table{font-size:.82rem}
+    .impact-table thead th,.impact-table tbody td{padding:14px 16px}
+  }
+</style>
+</head>
+<body>
+
+<div id="preloader">
+  <div class="pre-shapes">
+    <div class="pre-shape s1"></div>
+    <div class="pre-shape s2"></div>
+    <div class="pre-shape s3"></div>
+  </div>
+  <div class="pre-text">
+    <div class="line"><span>LUMEN</span></div>
+    <div class="line"><span class="accent">ENERGY</span></div>
+  </div>
+  <div class="pre-counter" id="preCounter">000</div>
+</div>
+<div id="wipe"></div>
+
+<div class="cursor-dot" id="cDot"></div>
+<div class="cursor-ring" id="cRing"></div>
+
+<div class="bg-grid"></div>
+
+<nav id="nav">
+  <a href="#hero" class="logo">LUMEN</a>
+  <div class="nav-right">
+    <ul class="nav-links">
+      <li><a href="#energias">Energías</a></li>
+      <li><a href="#impacto">Impacto</a></li>
+      <li><a href="#historia">Historia</a></li>
+      <li><a href="#futuro">Futuro</a></li>
+    </ul>
+    <button class="theme-toggle" id="themeToggle" aria-label="Cambiar modo">
+      <span class="knob">
+        <svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+          <circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>
+        </svg>
+        <svg class="ico-moon" viewBox="0 0 24 24" fill="currentColor"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+      </span>
+    </button>
+  </div>
+</nav>
+
+<!-- ===== HERO CON TORRE DE ALTA TENSIÓN ===== -->
+<section class="chapter" id="hero">
+
+  <div class="power-tower" aria-hidden="true">
+    <svg viewBox="0 0 260 900" fill="none" preserveAspectRatio="xMidYMid meet">
+      <defs>
+        <linearGradient id="towerMetal" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#1a3a2e"/>
+          <stop offset="50%" stop-color="#2a5a48"/>
+          <stop offset="100%" stop-color="#1a3a2e"/>
+        </linearGradient>
+        <linearGradient id="wireGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#00c896"/>
+          <stop offset="50%" stop-color="#ffd23f"/>
+          <stop offset="100%" stop-color="#ff4d9d"/>
+        </linearGradient>
+        <filter id="wireGlow">
+          <feGaussianBlur stdDeviation="2.5" result="blur"/>
+          <feMerge>
+            <feMergeNode in="blur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+      </defs>
+
+      <!-- Cables de alta tensión saliendo de los brazos -->
+      <path d="M60 180 Q-40 220 -80 300" stroke="url(#wireGrad)" stroke-width="2" fill="none" filter="url(#wireGlow)" opacity=".7"/>
+      <path d="M200 180 Q300 220 340 300" stroke="url(#wireGrad)" stroke-width="2" fill="none" filter="url(#wireGlow)" opacity=".7"/>
+      <path d="M60 180 Q-40 400 -80 520" stroke="url(#wireGrad)" stroke-width="1.5" fill="none" filter="url(#wireGlow)" opacity=".4"/>
+      <path d="M200 180 Q300 400 340 520" stroke="url(#wireGrad)" stroke-width="1.5" fill="none" filter="url(#wireGlow)" opacity=".4"/>
+
+      <!-- Estructura de la torre (triángulos metálicos) -->
+      <g stroke="url(#towerMetal)" stroke-width="2.5" fill="none" stroke-linejoin="round">
+        <!-- Base -->
+        <path d="M20 880 L80 200 L130 140 L180 200 L240 880"/>
+        <path d="M20 880 L240 880"/>
+        <!-- Brazos superiores -->
+        <path d="M40 240 L60 180 L130 140 L200 180 L220 240"/>
+        <line x1="60" y1="180" x2="130" y2="240"/>
+        <line x1="200" y1="180" x2="130" y2="240"/>
+        <!-- Cruzamiento interno -->
+        <line x1="80" y1="200" x2="180" y2="200"/>
+        <line x1="65" y1="320" x2="195" y2="320"/>
+        <line x1="55" y1="440" x2="205" y2="440"/>
+        <line x1="45" y1="560" x2="215" y2="560"/>
+        <line x1="35" y1="680" x2="225" y2="680"/>
+        <line x1="28" y1="800" x2="232" y2="800"/>
+        <!-- Diagonales -->
+        <line x1="65" y1="320" x2="205" y2="440"/>
+        <line x1="195" y1="320" x2="55" y2="440"/>
+        <line x1="55" y1="440" x2="215" y2="560"/>
+        <line x1="205" y1="440" x2="45" y2="560"/>
+        <line x1="45" y1="560" x2="225" y2="680"/>
+        <line x1="215" y1="560" x2="35" y2="680"/>
+        <line x1="35" y1="680" x2="232" y2="800"/>
+        <line x1="225" y1="680" x2="28" y2="800"/>
+      </g>
+
+      <!-- Aisladores en los brazos -->
+      <g fill="#ffd23f">
+        <circle cx="60" cy="180" r="4"/>
+        <circle cx="200" cy="180" r="4"/>
+        <circle cx="80" cy="200" r="3" opacity=".7"/>
+        <circle cx="180" cy="200" r="3" opacity=".7"/>
+      </g>
+
+      <!-- Cables verticales bajando desde los aisladores -->
+      <line x1="60" y1="184" x2="60" y2="240" stroke="url(#wireGrad)" stroke-width="1.5" opacity=".5"/>
+      <line x1="200" y1="184" x2="200" y2="240" stroke="url(#wireGrad)" stroke-width="1.5" opacity=".5"/>
+
+      <!-- Nodos pulsantes -->
+      <circle cx="60" cy="180" r="6" fill="#00c896" opacity=".8">
+        <animate attributeName="opacity" values=".4;1;.4" dur="2s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="200" cy="180" r="6" fill="#ff4d9d" opacity=".8">
+        <animate attributeName="opacity" values="1;.4;1" dur="2.3s" repeatCount="indefinite"/>
+      </circle>
+    </svg>
+  </div>
+
+  <div class="hero-sub">Energía renovable</div>
+  <h1 class="hero-title">
+    <span class="line"><span>FUENTES</span></span>
+    <span class="line"><span class="grad">INAGOTABLES</span></span>
+    <span class="line"><span>DE ENERGÍA</span></span>
+  </h1>
+  <div class="hero-info">
+    <div class="hero-stat"><span class="num">4.2</span><span class="lbl">TW capacidad global</span></div>
+    <div class="hero-stat"><span class="num">30%</span><span class="lbl">Electricidad renovable</span></div>
+    <div class="hero-stat"><span class="num">60M</span><span class="lbl">Empleos verdes</span></div>
+    <div class="hero-stat"><span class="num">0</span><span class="lbl">Emisiones netas</span></div>
+  </div>
+  <div class="scroll-hint"><span class="line-anim"></span> Scroll</div>
+</section>
+
+<!-- ===== SECCIÓN 01: ENERGÍAS ===== -->
+<section class="chapter" id="energias">
+  <div class="chapter-num">01</div>
+  <h2 class="chapter-title">
+    <span class="reveal-line"><span>SEIS FUENTES</span></span>
+    <span class="reveal-line"><span class="accent">RENOVABLES</span></span>
+  </h2>
+  <p class="chapter-desc">La naturaleza ofrece distintas formas de generar electricidad sin agotar recursos. Cada una con su propia personalidad, todas con un mismo propósito: un planeta habitable.</p>
+
+  <div class="energy-cards">
+    <div class="energy-card solar">
+      <div class="card-num">01</div>
+      <div class="card-icon">
+        <svg viewBox="0 0 64 64" fill="none">
+          <circle cx="32" cy="32" r="12" stroke="#ffd23f" stroke-width="3"/>
+          <g style="transform-origin:32px 32px;animation:spin 8s linear infinite">
+            <line x1="32" y1="6" x2="32" y2="16" stroke="#ffd23f" stroke-width="3" stroke-linecap="round"/>
+            <line x1="32" y1="48" x2="32" y2="58" stroke="#ffd23f" stroke-width="3" stroke-linecap="round"/>
+            <line x1="6" y1="32" x2="16" y2="32" stroke="#ffd23f" stroke-width="3" stroke-linecap="round"/>
+            <line x1="48" y1="32" x2="58" y2="32" stroke="#ffd23f" stroke-width="3" stroke-linecap="round"/>
+            <line x1="13.6" y1="13.6" x2="20.7" y2="20.7" stroke="#ffd23f" stroke-width="3" stroke-linecap="round"/>
+            <line x1="43.3" y1="43.3" x2="50.4" y2="50.4" stroke="#ffd23f" stroke-width="3" stroke-linecap="round"/>
+            <line x1="50.4" y1="13.6" x2="43.3" y2="20.7" stroke="#ffd23f" stroke-width="3" stroke-linecap="round"/>
+            <line x1="20.7" y1="43.3" x2="13.6" y2="50.4" stroke="#ffd23f" stroke-width="3" stroke-linecap="round"/>
+          </g>
+        </svg>
+      </div>
+      <h3>Solar</h3>
+      <p>La luz del sol es la fuente más abundante del planeta. Los paneles fotovoltaicos la transforman directamente en electricidad limpia y silenciosa.</p>
+      <span class="card-tag">Fotovoltaica · Térmica</span>
+    </div>
+
+    <div class="energy-card eolica">
+      <div class="card-num">02</div>
+      <div class="card-icon">
+        <svg viewBox="0 0 64 64" fill="none">
+          <line x1="32" y1="32" x2="32" y2="58" stroke="#3a86ff" stroke-width="3" stroke-linecap="round"/>
+          <g style="transform-origin:32px 32px;animation:spin 3s linear infinite">
+            <path d="M32 32 L32 10 Q38 10 38 18 L34 30 Z" fill="#3a86ff" opacity=".85"/>
+            <path d="M32 32 L52 44 Q48 50 40 46 L34 36 Z" fill="#3a86ff" opacity=".7"/>
+            <path d="M32 32 L12 44 Q16 50 24 46 L30 36 Z" fill="#3a86ff" opacity=".55"/>
+          </g>
+          <circle cx="32" cy="32" r="4" fill="#3a86ff"/>
+        </svg>
+      </div>
+      <h3>Eólica</h3>
+      <p>El viento mueve las aspas de los aerogeneradores, convirtiendo la energía cinética en electricidad. En tierra y en alta mar, el viento nunca descansa.</p>
+      <span class="card-tag">Onshore · Offshore</span>
+    </div>
+
+    <div class="energy-card hidraulica">
+      <div class="card-num">03</div>
+      <div class="card-icon">
+        <svg viewBox="0 0 64 64" fill="none">
+          <path d="M8 44 Q18 30 28 44 T48 44 T64 44" stroke="#00c896" stroke-width="3" stroke-linecap="round" fill="none"/>
+          <path d="M8 52 Q18 38 28 52 T48 52 T64 52" stroke="#00c896" stroke-width="3" stroke-linecap="round" opacity=".6" fill="none"/>
+          <path d="M32 8 L38 20 L32 18 L26 20 Z" fill="#00c896"/>
+          <line x1="32" y1="18" x2="32" y2="36" stroke="#00c896" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <h3>Hidráulica</h3>
+      <p>El agua en movimiento es una de las formas más antiguas y eficientes de generar electricidad. Las presas y las centrales de río aprovechan su fuerza.</p>
+      <span class="card-tag">Embalse · Flujo de río</span>
+    </div>
+
+    <div class="energy-card biomasa">
+      <div class="card-num">04</div>
+      <div class="card-icon">
+        <svg viewBox="0 0 64 64" fill="none">
+          <path d="M32 56 L32 30" stroke="#ff7b3d" stroke-width="3" stroke-linecap="round"/>
+          <path d="M32 40 Q22 34 20 22 Q30 26 32 36 Z" fill="#ff7b3d" opacity=".8"/>
+          <path d="M32 34 Q42 28 44 16 Q34 20 32 30 Z" fill="#ff7b3d" opacity=".6"/>
+          <circle cx="32" cy="12" r="4" fill="#ff7b3d" opacity=".7"/>
+        </svg>
+      </div>
+      <h3>Biomasa</h3>
+      <p>La materia orgánica —residuos agrícolas, forestales y urbanos— se transforma en energía. Una forma de cerrar el ciclo de los recursos naturales.</p>
+      <span class="card-tag">Biogás · Biocombustibles</span>
+    </div>
+
+    <div class="energy-card geotermica">
+      <div class="card-num">05</div>
+      <div class="card-icon">
+        <svg viewBox="0 0 64 64" fill="none">
+          <path d="M32 56 Q20 48 24 36 Q28 28 32 20 Q36 28 40 36 Q44 48 32 56 Z" fill="#ff4d9d" opacity=".75"/>
+          <circle cx="32" cy="16" r="5" fill="#ff4d9d" opacity=".9"/>
+        </svg>
+      </div>
+      <h3>Geotérmica</h3>
+      <p>El calor de la Tierra es una energía constante, disponible las 24 horas. Pozos profundos extraen vapor y agua caliente para generar electricidad y calefacción.</p>
+      <span class="card-tag">Alta entalpía · Bombas de calor</span>
+    </div>
+
+    <div class="energy-card mareomotriz">
+      <div class="card-num">06</div>
+      <div class="card-icon">
+        <svg viewBox="0 0 64 64" fill="none">
+          <path d="M6 40 Q16 28 32 40 T58 40" stroke="#8338ec" stroke-width="3" stroke-linecap="round" fill="none"/>
+          <circle cx="32" cy="22" r="10" stroke="#8338ec" stroke-width="3" stroke-dasharray="8 6" style="transform-origin:32px 22px;animation:spin 8s linear infinite" fill="none"/>
+          <circle cx="32" cy="22" r="3" fill="#8338ec"/>
+        </svg>
+      </div>
+      <h3>Mareomotriz</h3>
+      <p>La fuerza de las mareas, predecible y constante, mueve turbinas en las costas. El océano se convierte en un reloj energético natural.</p>
+      <span class="card-tag">Mareas · Corrientes</span>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SECCIÓN 02: TABLA DE IMPACTO ===== -->
+<section class="chapter" id="impacto">
+  <div class="chapter-num">02</div>
+  <h2 class="chapter-title">
+    <span class="reveal-line"><span>BENEFICIOS Y</span></span>
+    <span class="reveal-line"><span class="accent">CONSECUENCIAS</span></span>
+  </h2>
+  <p class="chapter-desc">Cada fuente renovable tiene ventajas claras, pero también desafíos propios. Cambia entre ambas vistas para comparar la otra cara de cada tecnología.</p>
+
+  <div class="table-switcher" role="tablist">
+    <button class="active" data-view="cons" role="tab">Consecuencias</button>
+    <button data-view="ben" role="tab">Beneficios</button>
+  </div>
+
+  <div class="table-viewport">
+    <div class="table-slider" id="tableSlider">
+
+      <!-- Panel: Consecuencias -->
+      <div class="table-panel">
+        <table class="impact-table">
+          <thead>
+            <tr>
+              <th>Tecnología</th>
+              <th>Impacto principal</th>
+              <th>Nivel</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Solar</td>
+              <td>Ocupación extensiva de terreno y necesidad de reciclaje de paneles al final de su vida útil (25-30 años).</td>
+              <td><span class="tag-cell tag-medio">Medio</span></td>
+            </tr>
+            <tr>
+              <td>Eólica</td>
+              <td>Impacto visual en paisajes y mortalidad de aves y murciélagos en rutas migratorias.</td>
+              <td><span class="tag-cell tag-medio">Medio</span></td>
+            </tr>
+            <tr>
+              <td>Hidráulica</td>
+              <td>Inundación de ecosistemas fluviales, desplazamiento de comunidades y alteración de sedimentos.</td>
+              <td><span class="tag-cell tag-alto">Alto</span></td>
+            </tr>
+            <tr>
+              <td>Biomasa</td>
+              <td>Emisiones de CO₂ durante la combustión y competencia por suelo agrícola y recursos hídricos.</td>
+              <td><span class="tag-cell tag-medio">Medio</span></td>
+            </tr>
+            <tr>
+              <td>Geotérmica</td>
+              <td>Emisiones de gases traza y riesgo de subsidencia o sismicidad inducida en perforaciones profundas.</td>
+              <td><span class="tag-cell tag-bajo">Bajo</span></td>
+            </tr>
+            <tr>
+              <td>Mareomotriz</td>
+              <td>Alteración de ecosistemas costeros y sedimentación en estuarios donde se instalan las turbinas.</td>
+              <td><span class="tag-cell tag-bajo">Bajo</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Panel: Beneficios -->
+      <div class="table-panel">
+        <table class="impact-table">
+          <thead>
+            <tr>
+              <th>Tecnología</th>
+              <th>Beneficio principal</th>
+              <th>Nivel</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Solar</td>
+              <td>Modular y escalable: desde tejados residenciales hasta grandes plantas. Cero emisiones en operación.</td>
+              <td><span class="tag-cell tag-bajo">Alto</span></td>
+            </tr>
+            <tr>
+              <td>Eólica</td>
+              <td>Alta eficiencia por hectárea y compatibilidad con uso agrícola y ganadero del terreno.</td>
+              <td><span class="tag-cell tag-bajo">Alto</span></td>
+            </tr>
+            <tr>
+              <td>Hidráulica</td>
+              <td>Generación constante y regulable, almacenamiento energético natural y bajo coste operativo.</td>
+              <td><span class="tag-cell tag-bajo">Alto</span></td>
+            </tr>
+            <tr>
+              <td>Biomasa</td>
+              <td>Aprovecha residuos, genera empleo rural y es gestionable como respaldo del sistema eléctrico.</td>
+              <td><span class="tag-cell tag-medio">Medio</span></td>
+            </tr>
+            <tr>
+              <td>Geotérmica</td>
+              <td>Disponible 24/7, independiente del clima y con una huella de superficie muy reducida.</td>
+              <td><span class="tag-cell tag-bajo">Alto</span></td>
+            </tr>
+            <tr>
+              <td>Mareomotriz</td>
+              <td>Predecible con años de antelación y con potencial de generación continua en zonas costeras.</td>
+              <td><span class="tag-cell tag-medio">Medio</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="table-legend">
+    <span><span class="dot" style="background:var(--verde)"></span> Nivel bajo / beneficio alto</span>
+    <span><span class="dot" style="background:var(--naranja)"></span> Nivel medio</span>
+    <span><span class="dot" style="background:var(--rojo)"></span> Nivel alto / impacto alto</span>
+  </div>
+</section>
+
+<!-- ===== SECCIÓN 03: HISTORIA ===== -->
+<section class="chapter" id="historia">
+  <div class="chapter-num">03</div>
+  <h2 class="chapter-title">
+    <span class="reveal-line"><span>LÍNEA</span></span>
+    <span class="reveal-line"><span class="accent">TEMPORAL</span></span>
+  </h2>
+  <p class="chapter-desc">Desde los primeros molinos hasta las gigantescas turbinas offshore, la humanidad lleva siglos persiguiendo la energía limpia. Estos son algunos hitos clave.</p>
+
+  <div class="timeline">
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-year">1882</div>
+      <p>La primera central hidroeléctrica del mundo comienza a operar en Appleton, Wisconsin. La energía del agua ilumina por primera vez una ciudad.</p>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-year">1954</div>
+      <p>Bell Labs presenta la primera célula solar de silicio práctica. Nace la tecnología que hoy cubre tejados de todo el planeta.</p>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-year">1991</div>
+      <p>Entra en funcionamiento el primer parque eólico marino del mundo en Dinamarca. El viento del mar se convierte en una nueva frontera energética.</p>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-year">2015</div>
+      <p>El Acuerdo de París impulsa la transición energética global. Más de 190 países se comprometen a limitar el calentamiento global.</p>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-year">2026</div>
+      <p>Las renovables superan por primera vez a los combustibles fósiles en la generación eléctrica de la Unión Europea. Un punto de inflexión histórico.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SECCIÓN 04: FUTURO ===== -->
+<section class="chapter" id="futuro">
+  <div class="chapter-num">04</div>
+  <h2 class="chapter-title">
+    <span class="reveal-line"><span>TRANSICIÓN</span></span>
+    <span class="reveal-line"><span class="accent">ENERGÉTICA</span></span>
+  </h2>
+  <p class="chapter-desc">Cada panel solar, cada aerogenerador, cada gota de agua aprovechada es un paso hacia un mundo más limpio. La energía renovable no es solo tecnología: es una decisión colectiva.</p>
+</section>
+
+<!-- ===== MARQUEE ===== -->
+<div class="marquee">
+  <div class="marquee-track">
+    <span>Solar</span>
+    <span>Eólica</span>
+    <span>Hidráulica</span>
+    <span>Biomasa</span>
+    <span>Geotérmica</span>
+    <span>Mareomotriz</span>
+    <span>Solar</span>
+    <span>Eólica</span>
+    <span>Hidráulica</span>
+    <span>Biomasa</span>
+    <span>Geotérmica</span>
+    <span>Mareomotriz</span>
+  </div>
+</div>
+
+<!-- ===== FOOTER ===== -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <a href="#hero" class="logo">LUMEN</a>
+      <p>Energía renovable para un planeta habitable. Un proyecto visual dedicado a las fuentes de energía que nunca se agotan.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Energías</h4>
+      <ul>
+        <li><a href="#energias">Solar</a></li>
+        <li><a href="#energias">Eólica</a></li>
+        <li><a href="#energias">Hidráulica</a></li>
+        <li><a href="#energias">Biomasa</a></li>
+        <li><a href="#energias">Geotérmica</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Explorar</h4>
+      <ul>
+        <li><a href="#impacto">Impacto</a></li>
+        <li><a href="#historia">Historia</a></li>
+        <li><a href="#futuro">Futuro</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div>© <span class="year">2026</span> LUMEN · Todos los derechos reservados.</div>
+    <div>Diseñado con energía limpia ⚡</div>
+  </div>
+</footer>
+
+<script>
+/* ===== PRELOADER ===== */
+(function(){
+  const preloader = document.getElementById('preloader');
+  const wipe = document.getElementById('wipe');
+  const counter = document.getElementById('preCounter');
+  const nav = document.getElementById('nav');
+  const target = 100;
+  const duration = 2500;
+  const start = performance.now();
+
+  function updateCounter(now){
+    const p = Math.min((now-start)/duration, 1);
+    const val = Math.floor(p * target);
+    counter.textContent = String(val).padStart(3, '0');
+    if(p < 1) requestAnimationFrame(updateCounter);
+    else {
+      counter.textContent = '100';
+      setTimeout(()=>{
+        wipe.classList.add('play');
+        setTimeout(()=>{
+          preloader.classList.add('done');
+          nav.classList.add('show');
+          setTimeout(()=>{
+            wipe.classList.add('exit');
+            setTimeout(()=>{ wipe.style.display = 'none'; }, 900);
+          }, 200);
+        }, 800);
+      }, 300);
+    }
+  }
+  requestAnimationFrame(updateCounter);
+
+  setTimeout(()=>{
+    if(!preloader.classList.contains('done')){
+      preloader.classList.add('done');
+      nav.classList.add('show');
+    }
+  }, 6000);
+})();
+
+/* ===== CURSOR ===== */
+(function(){
+  const dot = document.getElementById('cDot');
+  const ring = document.getElementById('cRing');
+  const isTouch = matchMedia('(hover: none), (pointer: coarse)').matches;
+  if(isTouch){ dot.style.display='none'; ring.style.display='none'; return; }
+  document.body.classList.add('cursor-hidden');
+
+  let mx = -100, my = -100, rx = -100, ry = -100, dotX = -100, dotY = -100;
+  let rafId = null;
+
+  document.addEventListener('mousemove', e=>{
+    mx = e.clientX; my = e.clientY;
+    if(!rafId) rafId = requestAnimationFrame(tick);
+  }, {passive:true});
+
+  function tick(){
+    dotX += (mx - dotX) * 0.7;
+    dotY += (my - dotY) * 0.7;
+    dot.style.transform = `translate3d(${dotX}px, ${dotY}px, 0)`;
+    rx += (mx - rx) * 0.35;
+    ry += (my - ry) * 0.35;
+    ring.style.transform = `translate3d(${rx}px, ${ry}px, 0)`;
+    if(Math.abs(mx-rx) > 0.1 || Math.abs(my-ry) > 0.1 ||
+       Math.abs(mx-dotX) > 0.1 || Math.abs(my-dotY) > 0.1){
+      rafId = requestAnimationFrame(tick);
+    } else rafId = null;
+  }
+
+  const hoverables = 'a, button, .energy-card, .theme-toggle, .table-switcher button';
+  document.addEventListener('mouseover', e=>{
+    if(e.target.closest(hoverables)) ring.classList.add('hover');
+  });
+  document.addEventListener('mouseout', e=>{
+    if(e.target.closest(hoverables)) ring.classList.remove('hover');
+  });
+})();
+
+/* ===== MODO OSCURO ===== */
+(function(){
+  const root = document.documentElement;
+  const toggle = document.getElementById('themeToggle');
+  const stored = localStorage.getItem('lumen-theme');
+  const prefersDark = matchMedia('(prefers-color-scheme: dark)').matches;
+  root.setAttribute('data-theme', stored || (prefersDark ? 'dark' : 'light'));
+  toggle.addEventListener('click', ()=>{
+    const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    localStorage.setItem('lumen-theme', next);
+  });
+})();
+
+/* ===== REVEAL DE CAPÍTULOS ===== */
+const chapterObserver = new IntersectionObserver(entries=>{
+  entries.forEach(en=>{
+    if(en.isIntersecting) en.target.classList.add('visible');
+  });
+}, {threshold: 0.2});
+document.querySelectorAll('.chapter').forEach(ch => chapterObserver.observe(ch));
+
+/* ===== TABLA DESLIZABLE ===== */
+(function(){
+  const slider = document.getElementById('tableSlider');
+  const buttons = document.querySelectorAll('.table-switcher button');
+  let current = 0;
+
+  buttons.forEach((btn, i)=>{
+    btn.addEventListener('click', ()=>{
+      current = i;
+      slider.style.transform = `translateX(-${i*100}%)`;
+      buttons.forEach(b => b.classList.toggle('active', b === btn));
+    });
+  });
+})();
+
+/* ===== SMOOTH SCROLL ===== */
+document.querySelectorAll('a[href^="#"]').forEach(a=>{
+  a.addEventListener('click', e=>{
+    const id = a.getAttribute('href');
+    if(id.length>1){
+      const el = document.querySelector(id);
+      if(el){ e.preventDefault(); el.scrollIntoView({behavior:'smooth', block:'start'}); }
+    }
+  });
+});
+</script>
+</body>
+</html>
